@@ -99,7 +99,7 @@ def main():
         dest_root_dir = 'data_text_20s'
         convert_all_midi_to_text(src_root_dir=src_root_dir, dest_root_dir=dest_root_dir, precision=3, max_time=20)
     elif test:
-        text_file_path = dest_root_dir+'/.38 Special/Fantasy Girl.txt'  # replace with your text file path
+        text_file_path = dest_root_dir+'/.38 Special/Fantasy Girl.txt'  
         with open(text_file_path, 'r') as f:
             text_representation = f.read()
         text_to_midi(text_representation, dest_root_dir+'/.38 Special/Fantasy Girl.mid')
