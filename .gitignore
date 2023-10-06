@@ -1,4 +1,5 @@
 data/clean_midi/*
+data/clean_midi_small/*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
