@@ -10,11 +10,9 @@ def midi_to_text(file_path, precision, max_time):
         program = instrument.program
         for note in instrument.notes:
             if note.start < max_time and note.end < max_time:
-                parts.append(f"{round(note.start, precision)},{round(note.end, precision)},\
-                                {round(note.pitch, precision)},{round(note.velocity, precision)},{program},{1 if instrument.is_drum else 0};")
+                parts.append(f"{round(note.start, precision)},{round(note.end, precision)},{round(note.pitch, precision)},{round(note.velocity, precision)},{program},{1 if instrument.is_drum else 0};")
             elif note.start < max_time and note.end > max_time:
-                parts.append(f"{round(note.start, precision)},{round(max_time, precision)},\
-                                {round(note.pitch, precision)},{round(note.velocity, precision)},{program},{1 if instrument.is_drum else 0};")
+                parts.append(f"{round(note.start, precision)},{round(max_time, precision)},{round(note.pitch, precision)},{round(note.velocity, precision)},{program},{1 if instrument.is_drum else 0};")
             elif note.start > max_time:
                 pass
     return file_path, "".join(parts)
@@ -42,11 +40,9 @@ def text_to_midi(text_representation, file_path):
 
     midi_data.write(file_path)
 
-#text = midi_to_text("./data/clean_midi/.38 Special/Fantasy Girl.mid", precision=3, max_time=20)
-#print(text)
-#text_to_midi(text, "./data/clean_midi/.38 Special/Fantasy Girl20.mid")
 
-def process_file(filename, dirpath, structure, precision, max_time):
+
+def process_file(filename, dirpath, src_root_dir, dest_root_dir, precision, max_time):
     if filename.endswith('.midi') or filename.endswith('.mid'):
         midi_path = os.path.join(dirpath, filename)
         try:
@@ -55,16 +51,25 @@ def process_file(filename, dirpath, structure, precision, max_time):
             print(f"Error processing {midi_path}: {e}")
             return
 
+        # Form the directory structure similar to dirpath but under dest_root_dir
+        relative_structure = os.path.relpath(dirpath, start=src_root_dir)
+        structure = os.path.join(dest_root_dir, relative_structure)
+
+        # Ensure the directory exists
+        os.makedirs(structure, exist_ok=True)
+
         # Save this text to a new text file in dest_root_dir
         txt_filename = f"{filename.split('.')[0]}.txt"
         dest_path = os.path.join(structure, txt_filename)
-        print(f"Saving to: {dest_path}")  # Debugging line
+        #print(f"Saving to: {dest_path}")  # Debugging line
+
         try:
             with open(dest_path, 'w') as f:
                 f.write(text_representation)
-            print(f"Successfully saved {txt_filename}")  # Debugging line
+            #print(f"Successfully saved {txt_filename}")  # Debugging line
         except Exception as e:
-            print(f"Failed to save {txt_filename}: {e}")  # Debugging line
+            #print(f"Failed to save {txt_filename}: {e}")  # Debugging line
+            pass
 
 def convert_all_midi_to_text(src_root_dir, dest_root_dir, precision=2, max_time=20):
     with ProcessPoolExecutor() as executor:
@@ -77,7 +82,7 @@ def convert_all_midi_to_text(src_root_dir, dest_root_dir, precision=2, max_time=
             
             futures = []
             for filename in filenames:
-                future = executor.submit(process_file, filename, dirpath, structure, precision, max_time)
+                future = executor.submit(process_file, filename, dirpath, src_root_dir, dest_root_dir, precision, max_time)
                 futures.append(future)
             
             for future in tqdm(as_completed(futures), total=len(futures), desc=f"Processing {dirpath}"):
@@ -87,8 +92,16 @@ def convert_all_midi_to_text(src_root_dir, dest_root_dir, precision=2, max_time=
                     print(f"Exception occurred during processing: {e}")
 
 def main():
-    src_root_dir = 'data\clean_midi_small'
-    dest_root_dir = 'data_text_20s'
-    convert_all_midi_to_text(src_root_dir=src_root_dir, dest_root_dir=dest_root_dir, precision=3, max_time=20)
+    test = False
+    
+    if not test:
+        src_root_dir = 'data\clean_midi'
+        dest_root_dir = 'data_text_20s'
+        convert_all_midi_to_text(src_root_dir=src_root_dir, dest_root_dir=dest_root_dir, precision=3, max_time=20)
+    elif test:
+        text_file_path = dest_root_dir+'/.38 Special/Fantasy Girl.txt'  # replace with your text file path
+        with open(text_file_path, 'r') as f:
+            text_representation = f.read()
+        text_to_midi(text_representation, dest_root_dir+'/.38 Special/Fantasy Girl.mid')
 if __name__ == '__main__':
     main()
