@@ -61,14 +61,14 @@ def process_file(filename, dirpath, src_root_dir, dest_root_dir, precision, max_
         # Save this text to a new text file in dest_root_dir
         txt_filename = f"{filename.split('.')[0]}.txt"
         dest_path = os.path.join(structure, txt_filename)
-        #print(f"Saving to: {dest_path}")  # Debugging line
+        #print(f"Saving to: {dest_path}")
 
         try:
             with open(dest_path, 'w') as f:
                 f.write(text_representation)
-            #print(f"Successfully saved {txt_filename}")  # Debugging line
+            #print(f"Successfully saved {txt_filename}")
         except Exception as e:
-            #print(f"Failed to save {txt_filename}: {e}")  # Debugging line
+            #print(f"Failed to save {txt_filename}: {e}") 
             pass
 
 def convert_all_midi_to_text(src_root_dir, dest_root_dir, precision=2, max_time=20):
