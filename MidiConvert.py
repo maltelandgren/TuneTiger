@@ -3,18 +3,22 @@ from concurrent.futures import ProcessPoolExecutor, as_completed
 import os
 from tqdm import tqdm
 
-def midi_to_text(file_path, precision, max_time):
+def midi_to_text(file_path, precision, max_time, max_events):
     midi_data = PrettyMIDI(file_path)
-    parts = []
+    note_events = []
     for instrument in midi_data.instruments:
         program = instrument.program
         for note in instrument.notes:
             if note.start < max_time and note.end < max_time:
-                parts.append(f"{round(note.start, precision)},{round(note.end, precision)},{round(note.pitch, precision)},{round(note.velocity, precision)},{program},{1 if instrument.is_drum else 0};")
+                note_events.append({"start": round(note.start, precision), "end": round(note.end, precision), "pitch": round(note.pitch, precision), "velocity": round(note.velocity, precision), "program": program, "is_drum": 1 if instrument.is_drum else 0})
             elif note.start < max_time and note.end > max_time:
-                parts.append(f"{round(note.start, precision)},{round(max_time, precision)},{round(note.pitch, precision)},{round(note.velocity, precision)},{program},{1 if instrument.is_drum else 0};")
+                note_events.append({"start": round(note.start, precision), "end": round(max_time, precision), "pitch": round(note.pitch, precision), "velocity": round(note.velocity, precision), "program": program, "is_drum": 1 if instrument.is_drum else 0})
             elif note.start > max_time:
                 pass
+    note_events = sorted(note_events, key=lambda x: x["start"])[0:min(len(note_events), max_events)]
+    #print("note events", len(note_events))
+    parts = [f"{event['start']},{event['end']},{event['pitch']},{event['velocity']},{event['program']},{event['is_drum']};" for event in note_events]
+    #print(parts)
     return file_path, "".join(parts)
 
 def text_to_midi(text_representation, file_path):
@@ -42,11 +46,11 @@ def text_to_midi(text_representation, file_path):
 
 
 
-def process_file(filename, dirpath, src_root_dir, dest_root_dir, precision, max_time):
+def process_file(filename, dirpath, src_root_dir, dest_root_dir, precision, max_time, max_events):
     if filename.endswith('.midi') or filename.endswith('.mid'):
         midi_path = os.path.join(dirpath, filename)
         try:
-            file_path, text_representation = midi_to_text(midi_path, precision, max_time)
+            file_path, text_representation = midi_to_text(midi_path, precision, max_time, max_events)
         except Exception as e:
             print(f"Error processing {midi_path}: {e}")
             return
@@ -71,7 +75,7 @@ def process_file(filename, dirpath, src_root_dir, dest_root_dir, precision, max_
             #print(f"Failed to save {txt_filename}: {e}") 
             pass
 
-def convert_all_midi_to_text(src_root_dir, dest_root_dir, precision=2, max_time=20):
+def convert_all_midi_to_text(src_root_dir, dest_root_dir, precision=2, max_time=20, max_events=1000):
     with ProcessPoolExecutor() as executor:
         for dirpath, dirnames, filenames in os.walk(src_root_dir):
             structure = os.path.join(dest_root_dir, dirpath[len(src_root_dir):])
@@ -82,7 +86,7 @@ def convert_all_midi_to_text(src_root_dir, dest_root_dir, precision=2, max_time=
             
             futures = []
             for filename in filenames:
-                future = executor.submit(process_file, filename, dirpath, src_root_dir, dest_root_dir, precision, max_time)
+                future = executor.submit(process_file, filename, dirpath, src_root_dir, dest_root_dir, precision, max_time, max_events)
                 futures.append(future)
             
             for future in tqdm(as_completed(futures), total=len(futures), desc=f"Processing {dirpath}"):
@@ -92,12 +96,11 @@ def convert_all_midi_to_text(src_root_dir, dest_root_dir, precision=2, max_time=
                     print(f"Exception occurred during processing: {e}")
 
 def main():
-    test = False
-    
-    if not test:
-        src_root_dir = 'data\clean_midi'
-        dest_root_dir = 'data_text_20s'
-        convert_all_midi_to_text(src_root_dir=src_root_dir, dest_root_dir=dest_root_dir, precision=3, max_time=20)
+    test = True
+    src_root_dir = 'data\clean_midi'
+    dest_root_dir = 'data_text_max_150_events'
+    if not test:    
+        convert_all_midi_to_text(src_root_dir=src_root_dir, dest_root_dir=dest_root_dir, precision=2, max_time=100, max_events=150)
     elif test:
         text_file_path = dest_root_dir+'/.38 Special/Fantasy Girl.txt'  
         with open(text_file_path, 'r') as f:

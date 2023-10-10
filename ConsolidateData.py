@@ -123,24 +123,25 @@ def generate_chat_format(data_object):
     return chat_object
 
 def main():
-    root_folder = "data_text_20s"
-    output_file = "consolidated_data.jsonl"
+    root_folder = "data_text_max_150_events"
+    output_file = "consolidated_data_150_events.jsonl"
 
     # Iterate through all text files and process them
     # Get the total number of files for the progress bar
     total_files = sum([len(files) for r, d, files in os.walk(root_folder) if any(file.endswith('.txt') for file in files)])
 
     with open(output_file, 'w') as out_file:
-        # Create a tqdm progress bar
         with tqdm(total=total_files, desc="Processing files") as pbar:
             for root, dirs, files in os.walk(root_folder):
                 for file in files:
                     if file.endswith('.txt'):
                         file_path = os.path.join(root, file)
-                        data_object = process_file(file_path)
-                        chat_object = generate_chat_format(data_object)
-                        out_file.write(json.dumps(chat_object) + '\n')
-
+                        try:
+                            data_object = process_file(file_path)
+                            chat_object = generate_chat_format(data_object)
+                            out_file.write(json.dumps(chat_object) + '\n')
+                        except Exception as e:
+                            print(f"Error processing {file_path}: {e}")
                         # Update the progress bar
                         pbar.update(1)
 
