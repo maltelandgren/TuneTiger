@@ -124,8 +124,8 @@ def generate_chat_format(data_object):
     return chat_object
 
 def main():
-    root_folder = 'data\TEXT\pianoBig_text_max_300_events'
-    output_file = 'data\JSONL\pianoBig_max_300_events.jsonl'
+    root_folder = 'data\TEXT\pianoBig_text_max_600_events'
+    output_file = 'data\JSONL\pianoBig_max_600_events.jsonl'
 
     # Iterate through all text files and process them
     # Get the total number of files for the progress bar

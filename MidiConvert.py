@@ -98,9 +98,9 @@ def convert_all_midi_to_text(src_root_dir, dest_root_dir, precision=2, max_time=
 def main():
     test = False
     src_root_dir = 'data\MIDI\Piano'
-    dest_root_dir = 'data\TEXT\pianoBig_text_max_300_events'
+    dest_root_dir = 'data\TEXT\pianoBig_text_max_600_events'
     if not test:    
-        convert_all_midi_to_text(src_root_dir=src_root_dir, dest_root_dir=dest_root_dir, precision=2, max_time=1000, max_events=150)
+        convert_all_midi_to_text(src_root_dir=src_root_dir, dest_root_dir=dest_root_dir, precision=2, max_time=1000, max_events=600)
     elif test:
         text_file_path = dest_root_dir+'/.38 Special/Fantasy Girl.txt'  
         with open(text_file_path, 'r') as f:
