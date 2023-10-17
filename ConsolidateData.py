@@ -7,7 +7,8 @@ import copy
 
 def process_file(file_path):
     # Extract artist and song title from the directory structure and file name
-    folder_name, artist, song_title = file_path.split(os.sep)
+    #print(file_path.split(os.sep))
+    dir, dataset, folder_name, artist, song_title = file_path.split(os.sep)
     song_title = song_title.replace('.txt', '')
 
     # Read MIDI data from file
@@ -123,8 +124,8 @@ def generate_chat_format(data_object):
     return chat_object
 
 def main():
-    root_folder = "data_text_max_150_events"
-    output_file = "consolidated_data_150_events.jsonl"
+    root_folder = 'data\TEXT\pianoBig_text_max_300_events'
+    output_file = 'data\JSONL\pianoBig_max_300_events.jsonl'
 
     # Iterate through all text files and process them
     # Get the total number of files for the progress bar
