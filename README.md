@@ -3,6 +3,11 @@
 ## Dataset
 We use the lakh clean dataset https://colinraffel.com/projects/lmd/#get
 
+and piano music:
+Combined from: https://github.com/bytedance/GiantMIDI-Piano
+and
+http://www.piano-midi.de/midi_files.htm
+
 ### Preprocessing
 1. Convert MIDI into .txt: ☑️DONE (only kept first X events, done in MidiConvert.py)
 2. Create a dataset: ☑️DONE (ConsolidateData.py)
